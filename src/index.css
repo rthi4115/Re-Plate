@@ -1,95 +1,157 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-primary: oklch(0.68 0.22 30);
-  --color-background: oklch(0.13 0.03 260);
-  --color-stats-blue: rgba(21, 101, 192, 0.5);
-  --color-stats-green: rgba(67, 160, 71, 0.5);
-  --color-stats-purple: rgba(123, 31, 162, 0.5);
-  --color-high-impact: #FF6B35;
+  --color-primary: var(--color-primary-base);
+  --color-primary-dark: var(--color-primary-hover-base);
+  
+  --color-bg: var(--color-bg-base);
+  --color-surface: var(--color-surface-base);
+  --color-border: var(--color-border-base);
+  
+  --color-text-main: var(--color-text);
+  --color-text-muted: var(--color-text-secondary);
+  
   --font-sans: 'Plus Jakarta Sans', sans-serif;
+  
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@layer base {
+  :root {
+    /* Beautiful Green Theme */
+    --color-primary-base: #22C55E;
+    --color-primary-hover-base: #16A34A;
+    
+    /* Default Dark Mode (From screenshot) */
+    --color-bg-base: #0B0F19;           /* Very dark navy */
+    --color-surface-base: #131823;      /* Slightly lighter module */
+    --color-border-base: #1F2937;       /* Soft dark outlines */
+    
+    --color-text: #FFFFFF;
+    --color-text-secondary: #9CA3AF;
+  }
+
+  /* Light mode flips it for accessibility if toggled, though default is dark aesthetic */
+  html.light {
+    --color-bg-base: #F3F4F6;
+    --color-surface-base: #FFFFFF;
+    --color-border-base: #E5E7EB;
+    
+    --color-text: #111827;
+    --color-text-secondary: #6B7280;
+  }
 }
 
 body {
-  background-color: var(--color-background);
-  color: #E2E8F0; /* Light gray for readability on dark background */
+  background-color: var(--color-bg);
+  color: var(--color-text-main);
+  transition: background-color 0.4s ease, color 0.4s ease;
+  font-family: var(--font-sans);
 }
 
-/* Base custom classes to match the prompt specifications */
 @layer components {
-  .btn-primary {
-    background-color: var(--color-primary);
-    color: white;
-    font-weight: 600;
-    border-radius: 0.5rem;
-    width: 100%;
-    height: 3rem;
-    font-size: 1rem;
-    transition-duration: 300ms;
-    transition-property: all;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 4px 14px 0 oklch(0.68 0.22 30 / 39%);
-  }
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px oklch(0.68 0.22 30 / 40%);
-  }
-  .btn-primary:active {
-    transform: scale(0.95);
-    transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-  
-  .card {
-    background-color: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px); /* Safari support */
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 20px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    color: white;
-  }
-
+  /* Super crisp pill inputs matching screenshot */
   .input-field {
-    background-color: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 0.5rem;
-    padding: 0.75rem;
+    background-color: rgba(255,255,255,0.03);
+    border: 1px solid var(--color-border);
+    border-radius: 9999px; /* Pill */
+    padding: 0.8rem 1.2rem;
     font-size: 0.875rem;
     width: 100%;
-    color: white;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    color: var(--color-text-main);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .input-field::placeholder { color: rgba(255, 255, 255, 0.4); }
+  html.light .input-field {
+    background-color: rgba(0,0,0,0.02);
+  }
+  
+  .input-field::placeholder { 
+    color: var(--color-text-muted); 
+  }
   .input-field:focus {
     outline: none;
     border-color: var(--color-primary);
-    background-color: rgba(0, 0, 0, 0.4);
-    box-shadow: 0 0 0 2px oklch(0.68 0.22 30 / 20%);
+    background-color: rgba(255,255,255,0.06);
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
   }
 
-  .high-impact-badge {
-    background-color: var(--color-high-impact);
+  /* Role Selection Cards */
+  .role-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 1.25rem;
+    padding: 1.25rem;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+  }
+  .role-card.selected {
+    border-color: var(--color-primary);
+    background-color: rgba(34, 197, 94, 0.05);
+    box-shadow: 0 4px 20px rgba(34, 197, 94, 0.15);
+  }
+  .role-card:active {
+    transform: scale(0.96);
+  }
+
+  /* Vibrant Actions */
+  .btn-primary {
+    background: linear-gradient(135deg, #4ADE80 0%, #22C55E 100%);
     color: white;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 0.25rem 0.5rem;
-    box-shadow: 0 2px 8px rgba(255, 107, 53, 0.4);
+    font-weight: 700;
+    border-radius: 9999px; /* Pill */
+    width: 100%;
+    height: 3.5rem;
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);
+  }
+  .btn-primary:active {
+    transform: scale(0.95);
   }
 
-  .nav-glass {
-    background-color: rgba(15, 23, 42, 0.7);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+  /* Standard card styling */
+  .card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 1.25rem;
+    color: var(--color-text-main);
+    transition: transform 0.3s ease, border-color 0.3s ease;
   }
   
-  .nav-item {
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  /* Filter chips */
+  .filter-chip {
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    transition: all 0.2s ease;
+    cursor: pointer;
   }
-  .nav-item:active {
-    transform: scale(0.9);
+  .filter-chip.active {
+    background-color: rgba(34, 197, 94, 0.1);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
   }
+  .filter-chip:active {
+    transform: scale(0.95);
+  }
+}
+
+/* Custom hide scrollbar */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

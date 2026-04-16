@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Leaf, UserPlus, Eye, EyeOff } from '../components/Icons';
-import { mockDb } from '../services/mockDb';
-import { useAuth } from '../context/AuthContext';
+import { Leaf } from '../components/Icons';
+import { supabase } from '../services/supabaseClient';
 import type { Role } from '../types';
 
 export default function SignUp() {
@@ -14,12 +13,10 @@ export default function SignUp() {
     address: ''
   });
   const [role, setRole] = useState<Role>('donor');
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
   const navigate = useNavigate();
-  const { login } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -31,17 +28,45 @@ export default function SignUp() {
     setIsLoading(true);
 
     try {
-      if (mockDb.getUserByEmail(formData.email)) {
-        throw new Error('Email already exists');
+      const { data, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password
+      });
+
+      if (authError) {
+        alert(authError.message);
+        setIsLoading(false);
+        return;
       }
 
-      const newUser = mockDb.createUser({
-        ...formData,
-        role
-      });
-      
-      login(newUser);
-      navigate(`/${role}`);
+      const user = data.user;
+
+      if (!user) {
+        alert("User not created");
+        setIsLoading(false);
+        return;
+      }
+
+      // Now insert into public.users using SAME ID
+      const { error: insertError } = await supabase.from('users').insert([
+        {
+          id: user.id,
+          name: formData.name,
+          email: formData.email,
+          role: role,
+          phone: formData.phone,
+          address: formData.address
+        }
+      ]);
+
+      if (insertError) {
+        alert(insertError.message);
+        setIsLoading(false);
+        return;
+      }
+
+      alert("Signup successful");
+      navigate(`/${role}-dashboard`);
     } catch (err: any) {
       setError(err.message || 'Failed to sign up');
     } finally {
@@ -50,142 +75,149 @@ export default function SignUp() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-[480px]">
-        {/* Header */}
-        <div className="flex flex-col items-center mb-6">
-          <div className="w-14 h-14 rounded-[20px] bg-gradient-to-br from-[#FF6B35] to-[var(--color-primary)] flex items-center justify-center mb-3 shadow-lg shadow-[var(--color-primary)]/30">
-            <UserPlus className="text-white w-7 h-7" />
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-[var(--color-bg)]">
+      <div className="w-full max-w-[420px] pb-10">
+        {/* Logo and Header */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-16 h-16 rounded-[20px] bg-gradient-to-br from-[#4ADE80] to-[#22C55E] flex items-center justify-center mb-4 shadow-[0_8px_30px_rgba(34,197,94,0.3)]">
+            <Leaf className="text-white w-8 h-8" />
           </div>
-          <h1 className="text-[28px] font-bold text-white mb-1">Join RePlate 🎉</h1>
-          <p className="text-gray-400 text-sm text-center">Create an account to start making an impact 🌍</p>
+          <h1 className="text-[28px] font-bold text-[var(--color-text-main)] tracking-tight">Join FoodBridge</h1>
         </div>
 
-        {/* Card */}
-        <div className="card p-8 mb-6 relative overflow-hidden">
-          <div className="absolute top-[-50px] right-[-50px] w-32 h-32 bg-[var(--color-primary)] rounded-full blur-[80px] opacity-40"></div>
-          <div className="absolute bottom-[-50px] left-[-50px] w-32 h-32 bg-[#FF6B35] rounded-full blur-[80px] opacity-20"></div>
-
-          <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
-            {error && (
-              <div className="p-3 bg-red-500/20 text-red-300 border border-red-500/30 rounded-lg text-sm text-center">
-                {error} ⚠️
-              </div>
-            )}
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-gray-300 mb-1.5">Full Name 👤</label>
-                <input 
-                  type="text" 
-                  name="name"
-                  required
-                  className="input-field" 
-                  placeholder="John Doe"
-                  value={formData.name}
-                  onChange={handleChange}
-                />
-              </div>
-              
-              <div>
-                <label className="block text-xs font-semibold text-gray-300 mb-1.5">Phone 📱</label>
-                <input 
-                  type="tel" 
-                  name="phone"
-                  required
-                  className="input-field" 
-                  placeholder="(555) 000-0000"
-                  value={formData.phone}
-                  onChange={handleChange}
-                />
-              </div>
+        <form onSubmit={handleSubmit} className="space-y-5 w-full relative z-10 flex flex-col">
+          {error && (
+            <div className="p-3 bg-green-900/40 text-green-300 border border-green-800/50 rounded-2xl text-sm text-center">
+              {error}
             </div>
+          )}
+          
+          <div className="grid grid-cols-2 gap-4">
+             <div className="space-y-1.5">
+               <label className="block text-[11px] font-bold text-[var(--color-text-muted)] tracking-wider uppercase ml-4">Full Name</label>
+               <input 
+                 type="text" 
+                 name="name"
+                 required
+                 className="input-field h-[54px]" 
+                 placeholder="John Doe" 
+                 value={formData.name}
+                 onChange={handleChange}
+               />
+             </div>
+             <div className="space-y-1.5">
+               <label className="block text-[11px] font-bold text-[var(--color-text-muted)] tracking-wider uppercase ml-4">Phone</label>
+               <input 
+                 type="text" 
+                 name="phone"
+                 required
+                 className="input-field h-[54px]" 
+                 placeholder="(555) 000-0000" 
+                 value={formData.phone}
+                 onChange={handleChange}
+               />
+             </div>
+          </div>
+          
+          <div className="space-y-1.5">
+            <label className="block text-[11px] font-bold text-[var(--color-text-muted)] tracking-wider uppercase ml-4">Email</label>
+            <input 
+              type="email" 
+              name="email"
+              required
+              className="input-field h-[54px]" 
+              placeholder="you@example.com" 
+              value={formData.email}
+              onChange={handleChange}
+            />
+          </div>
+          
+          <div className="space-y-1.5">
+            <label className="block text-[11px] font-bold text-[var(--color-text-muted)] tracking-wider uppercase ml-4">Password</label>
+            <input 
+              type="password"
+              name="password"
+              required
+              className="input-field h-[54px] tracking-[0.2em] font-bold" 
+              placeholder="••••••••" 
+              value={formData.password}
+              onChange={handleChange}
+            />
+          </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-gray-300 mb-1.5">Email 📧</label>
-              <input 
-                type="email" 
-                name="email"
-                required
-                className="input-field" 
-                placeholder="you@example.com"
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-gray-300 mb-1.5">Address / Organization 📍</label>
-              <input 
-                type="text" 
-                name="address"
-                required
-                className="input-field" 
-                placeholder="123 Community St."
-                value={formData.address}
-                onChange={handleChange}
-              />
-            </div>
-            
-            <div className="relative">
-              <label className="block text-xs font-semibold text-gray-300 mb-1.5">Password 🔒</label>
-              <input 
-                type={showPassword ? 'text' : 'password'} 
-                name="password"
-                required
-                className="input-field pr-10" 
-                placeholder="Create a password" 
-                value={formData.password}
-                onChange={handleChange}
-              />
-              <button 
-                type="button"
-                className="absolute right-3 top-[28px] text-gray-400 hover:text-white transition-colors"
-                onClick={() => setShowPassword(!showPassword)}
+          <div className="pt-4">
+            <label className="block text-[11px] font-bold text-[var(--color-text-muted)] tracking-wider uppercase ml-4 mb-3">I AM A...</label>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Donor */}
+              <div 
+                className={`role-card flex flex-col justify-center ${role === 'donor' ? 'selected' : ''}`}
+                onClick={() => setRole('donor')}
               >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-
-            {/* Role Selection */}
-            <div className="pt-2">
-              <label className="block text-xs font-semibold text-gray-300 mb-2">I want to... 🤔</label>
-              <div className="grid grid-cols-3 gap-2">
-                {(['donor', 'volunteer', 'receiver'] as Role[]).map((r) => (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => setRole(r)}
-                    className={`py-2 px-1 rounded-lg text-xs font-semibold border transition-all duration-200 ${
-                      role === r 
-                        ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)] shadow-[0_2px_10px_oklch(0.68_0.22_30_/_40%)] transform scale-[1.02]' 
-                        : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
-                    }`}
-                  >
-                    {r === 'donor' && 'Donate 🥘'}
-                    {r === 'volunteer' && 'Volunteer 🛵'}
-                    {r === 'receiver' && 'Receive 💖'}
-                  </button>
-                ))}
+                <div className="flex items-center gap-2 mb-1.5">
+                   <span className="text-[var(--color-text-main)]">🥗</span>
+                   <span className="font-bold text-[var(--color-text-main)]">Donor</span>
+                </div>
+                <span className="text-xs text-[var(--color-text-muted)]">Share surplus food</span>
+              </div>
+              {/* NGO */}
+              <div 
+                className={`role-card flex flex-col justify-center ${role === 'ngo' ? 'selected' : ''}`}
+                onClick={() => setRole('ngo')}
+              >
+                <div className="flex items-center gap-2 mb-1.5">
+                   <span className="text-[var(--color-text-main)]">🏢</span>
+                   <span className="font-bold text-[var(--color-text-main)]">NGO</span>
+                </div>
+                <span className="text-xs text-[var(--color-text-muted)]">Collect for communities</span>
+              </div>
+              {/* Volunteer */}
+              <div 
+                className={`role-card flex flex-col justify-center ${role === 'volunteer' ? 'selected' : ''}`}
+                onClick={() => setRole('volunteer')}
+              >
+                <div className="flex items-center gap-2 mb-1.5">
+                   <span className="text-[var(--color-text-main)]">🤝</span>
+                   <span className="font-bold text-[var(--color-text-main)]">Volunteer</span>
+                </div>
+                <span className="text-xs text-[var(--color-text-muted)]">Help with pickups</span>
+              </div>
+              {/* Receiver */}
+              <div 
+                className={`role-card flex flex-col justify-center ${role === 'receiver' ? 'selected' : ''}`}
+                onClick={() => setRole('receiver')}
+              >
+                <div className="flex items-center gap-2 mb-1.5">
+                   <span className="text-[var(--color-text-main)]">🍽️</span>
+                   <span className="font-bold text-[var(--color-text-main)]">Receiver</span>
+                </div>
+                <span className="text-xs text-[var(--color-text-muted)]">Find available food</span>
               </div>
             </div>
-            
+          </div>
+
+          <div className="pt-6 relative">
             <button 
               type="submit" 
-              className="btn-primary mt-6 !h-11"
+              className="btn-primary flex items-center justify-center gap-2"
               disabled={isLoading}
             >
-              {isLoading ? 'Creating account... ⏳' : 'Sign Up 🚀'}
+              <span>{isLoading ? 'Registering...' : 'Sign Up'}</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-80"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </button>
-          </form>
+            <div className="absolute -bottom-8 w-full flex items-center justify-center gap-4 opacity-50 blur-[2px] pointer-events-none">
+              <span className="text-xl">🍕</span>
+              <span className="text-xl">🍲</span>
+              <span className="text-xl">🍞</span>
+            </div>
+          </div>
+        </form>
 
-          <p className="text-center mt-5 text-sm text-gray-400 relative z-10">
-            Already have an account?{' '}
-            <Link to="/login" className="text-[var(--color-primary)] font-semibold hover:underline">
-              Login 🔑
-            </Link>
-          </p>
-        </div>
+        <p className="text-center mt-12 text-sm text-[var(--color-text-muted)] font-medium">
+          Already have an account?{' '}
+          <Link to="/login" className="text-[var(--color-text-main)] font-bold hover:text-[var(--color-primary)] transition-colors">
+            Sign In
+          </Link>
+        </p>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-export type Role = 'donor' | 'volunteer' | 'receiver';
+export type Role = 'donor' | 'volunteer' | 'receiver' | 'ngo';
 
 export interface User {
   id: string;
@@ -9,7 +9,7 @@ export interface User {
   role: Role;
 }
 
-export type ListingStatus = 'active' | 'pending_receiver' | 'in_delivery' | 'completed';
+export type ListingStatus = 'available' | 'active' | 'pending_receiver' | 'in_delivery' | 'completed';
 
 export interface Listing {
   id: string;

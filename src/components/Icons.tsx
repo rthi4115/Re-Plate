@@ -19,3 +19,5 @@ export const Clock = createIcon("M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6
 export const MapPin = createIcon("M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6z");
 export const Plus = createIcon("M12 5v14 M5 12h14");
 export const X = createIcon("M18 6 6 18 M6 6l12 12");
+export const Sun = createIcon("M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364-.707-.707M6.343 6.343l-.707-.707m12.728 0-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z");
+export const Moon = createIcon("M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z");

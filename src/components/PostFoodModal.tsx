@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { X } from '../components/Icons';
-import { mockDb } from '../services/mockDb';
+import { supabase } from '../services/supabaseClient';
 import { useAuth } from '../context/AuthContext';
+import { toast } from '../components/Toast';
 
 interface PostFoodModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface PostFoodModalProps {
 export const PostFoodModal = ({ isOpen, onClose, onSuccess }: PostFoodModalProps) => {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [locationState, setLocationState] = useState<{lat?: number, lng?: number}>({});
   const [formData, setFormData] = useState({
     foodType: '',
     quantity: '',
@@ -27,21 +29,60 @@ export const PostFoodModal = ({ isOpen, onClose, onSuccess }: PostFoodModalProps
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser. Please enter your location manually.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        setLocationState({ lat, lng });
+
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+          const data = await res.json();
+          if (data && data.display_name) {
+            setFormData(prev => ({ ...prev, pickupLocation: data.display_name }));
+          } else {
+            setFormData(prev => ({ ...prev, pickupLocation: `Lat: ${lat}, Lng: ${lng}` }));
+          }
+        } catch (err) {
+          setFormData(prev => ({ ...prev, pickupLocation: `Lat: ${lat}, Lng: ${lng}` }));
+        }
+      },
+      () => {
+        alert("Please enter your location manually");
+      }
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
     
     setIsSubmitting(true);
     try {
-      await mockDb.createListing({
-        donorId: user.id,
-        foodType: formData.foodType,
+      const { error: insertError } = await supabase.from('donations').insert([{
+        donor_id: user.id,
+        food_type: formData.foodType,
         quantity: formData.quantity,
         servings: parseInt(formData.servings, 10),
-        freshnessHours: parseInt(formData.freshnessHours, 10),
-        pickupLocation: formData.pickupLocation,
-        description: formData.description
-      });
+        freshness_hours: parseInt(formData.freshnessHours, 10),
+        pickup_location: formData.pickupLocation,
+        phone: user.phone || 'N/A',
+        description: formData.description,
+        status: 'available'
+      }]);
+      console.log("Submitted Donation with Location:", { ...formData, ...locationState });
+      
+      if (insertError) {
+        toast('Failed to post food: ' + insertError.message, 'error');
+        throw insertError;
+      }
+      toast('🎉 Food posted successfully! Receivers can now claim it.', 'success');
       onSuccess();
       onClose();
     } catch (error) {
@@ -52,65 +93,77 @@ export const PostFoodModal = ({ isOpen, onClose, onSuccess }: PostFoodModalProps
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-      <div className="bg-white rounded-[14px] shadow-xl w-full max-w-[500px] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        <div className="flex justify-between items-center p-6 border-b border-gray-100">
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-md">
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[24px] shadow-2xl w-full max-w-[420px] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="flex justify-between items-center p-6 border-b border-[var(--color-border)]">
           <div>
-            <h2 className="text-[22px] font-bold text-primary">Post Surplus Food</h2>
-            <p className="text-[#9E9E9E] text-[13px] mt-1">Share details about the food you want to donate</p>
+            <h2 className="text-[22px] font-bold text-[var(--color-text-main)] tracking-tight">Post Surplus Food</h2>
+            <p className="text-[var(--color-text-muted)] text-[12px] mt-1 uppercase tracking-wider font-bold">Share details below</p>
           </div>
           <button 
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 bg-gray-100 hover:bg-gray-200 p-2 rounded-full transition-colors"
+            className="text-[var(--color-text-muted)] hover:text-white bg-[var(--color-bg)] hover:bg-[#1E2530] p-2.5 rounded-full transition-colors"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Food Type</label>
-              <input required name="foodType" onChange={handleChange} className="input-field" placeholder="e.g., Rice & Curry" />
+              <label className="block text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider ml-2 mb-1.5">Food Type</label>
+              <input required name="foodType" onChange={handleChange} className="input-field h-[50px]" placeholder="e.g., Rice & Curry" />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Quantity</label>
-              <input required name="quantity" onChange={handleChange} className="input-field" placeholder="e.g., 2 large trays" />
+              <label className="block text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider ml-2 mb-1.5">Quantity</label>
+              <input required name="quantity" onChange={handleChange} className="input-field h-[50px]" placeholder="e.g., 2 large trays" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Estimated Servings</label>
-              <input required type="number" min="1" name="servings" onChange={handleChange} className="input-field" placeholder="10" />
+              <label className="block text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider ml-2 mb-1.5">Est. Servings</label>
+              <input required type="number" min="1" name="servings" onChange={handleChange} className="input-field h-[50px]" placeholder="10" />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Freshness (hours)</label>
-              <input required type="number" min="1" name="freshnessHours" onChange={handleChange} className="input-field" placeholder="4" />
+              <label className="block text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider ml-2 mb-1.5">Freshness (hrs)</label>
+              <input required type="number" min="1" name="freshnessHours" onChange={handleChange} className="input-field h-[50px]" placeholder="4" />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Pickup Location</label>
-            <input required name="pickupLocation" value={formData.pickupLocation} onChange={handleChange} className="input-field" placeholder="Full address" />
+            <div className="flex justify-between items-center mb-1.5 ml-2">
+              <label className="block text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">Pickup Location</label>
+              <button 
+                type="button" 
+                onClick={handleGetLocation}
+                className="text-[10px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity flex items-center gap-1"
+              >
+                📍 Get Location
+              </button>
+            </div>
+            <input required name="pickupLocation" value={formData.pickupLocation} onChange={handleChange} className="input-field h-[50px]" placeholder="Full address" />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Description (Optional)</label>
+            <label className="block text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider ml-2 mb-1.5">Description</label>
             <textarea 
               name="description" 
               onChange={handleChange} 
-              className="input-field min-h-[80px] resize-none" 
+              className="input-field min-h-[80px] resize-none rounded-2xl" 
               placeholder="Any specific instructions for pickup?" 
             />
           </div>
 
-          <button type="submit" disabled={isSubmitting} className="btn-primary w-full mt-2">
-            ✨ {isSubmitting ? 'Creating...' : 'Create Listing'}
-          </button>
+          <div className="pt-2">
+            <button type="submit" disabled={isSubmitting} className="btn-primary w-full shadow-[0_4px_14px_rgba(34,197,94,0.3)]">
+              ✨ {isSubmitting ? 'Creating...' : 'Create Listing'}
+            </button>
+          </div>
         </form>
       </div>
     </div>
   );
 };
+
 

@@ -1,13 +1,19 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
+import { DonationProvider } from './context/DonationContext';
+import { ChatBot } from './components/ChatBot';
+import { RealtimeSidebar } from './components/RealtimeSidebar';
+import { ToastContainer } from './components/Toast';
 
-// Pages - to be created
 import Login from './pages/Login';
+import VolunteerLogin from './pages/VolunteerLogin';
 import SignUp from './pages/SignUp';
 import DonorDashboard from './pages/DonorDashboard';
 import VolunteerDashboard from './pages/VolunteerDashboard';
 import ReceiverDashboard from './pages/ReceiverDashboard';
+import ImpactDashboard from './pages/ImpactDashboard';
+import VolunteerImpactDashboard from './pages/VolunteerImpactDashboard';
 
 const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: string[] }) => {
   const { user } = useAuth();
@@ -26,10 +32,11 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
+      <Route path="/volunteer-login" element={user ? <Navigate to="/" replace /> : <VolunteerLogin />} />
       <Route path="/signup" element={user ? <Navigate to="/" replace /> : <SignUp />} />
       
       <Route 
-        path="/donor" 
+        path="/donor-dashboard" 
         element={
           <ProtectedRoute allowedRoles={['donor']}>
             <DonorDashboard />
@@ -37,7 +44,15 @@ const AppRoutes = () => {
         } 
       />
       <Route 
-        path="/volunteer" 
+        path="/ngo-dashboard" 
+        element={
+          <ProtectedRoute allowedRoles={['ngo']}>
+            <DonorDashboard />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/volunteer-dashboard" 
         element={
           <ProtectedRoute allowedRoles={['volunteer']}>
             <VolunteerDashboard />
@@ -45,34 +60,58 @@ const AppRoutes = () => {
         } 
       />
       <Route 
-        path="/receiver" 
+        path="/receiver-dashboard" 
         element={
           <ProtectedRoute allowedRoles={['receiver']}>
             <ReceiverDashboard />
           </ProtectedRoute>
         } 
       />
+
+      {/* Impact pages */}
+      <Route
+        path="/impact"
+        element={
+          <ProtectedRoute allowedRoles={['donor', 'ngo']}>
+            <ImpactDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/volunteer-impact"
+        element={
+          <ProtectedRoute allowedRoles={['volunteer']}>
+            <VolunteerImpactDashboard />
+          </ProtectedRoute>
+        }
+      />
+
       
       {/* Root redirect based on role */}
       <Route 
         path="/" 
         element={
           !user ? <Navigate to="/login" replace /> : 
-          <Navigate to={`/${user.role}`} replace />
+          <Navigate to={`/${user.role}-dashboard`} replace />
         } 
       />
     </Routes>
   );
 };
 
-function App() {
+export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <DonationProvider>
+          <BrowserRouter>
+            <AppRoutes />
+            <ChatBot />
+            <RealtimeSidebar />
+            <ToastContainer />
+          </BrowserRouter>
+        </DonationProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
-
-export default App;
