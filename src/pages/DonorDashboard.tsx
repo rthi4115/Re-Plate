@@ -26,16 +26,16 @@ export default function DonorDashboard() {
   const completedCount = listings.filter(l => l.status === 'completed').length;
 
   return (
-    <div className="min-h-screen bg-background pb-12">
+    <div className="min-h-screen bg-[var(--color-background)] pb-28">
       <Navigation 
-        title="Donor Dashboard" 
+        title="Donor Dashboard 🥗" 
         rightElement={
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="bg-primary hover:bg-opacity-90 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center transition-colors"
+            className="nav-item bg-[var(--color-primary)] hover:opacity-90 text-white px-5 py-3 rounded-[1.5rem] w-full justify-center text-sm font-semibold flex items-center shadow-[0_4px_14px_0_oklch(0.68_0.22_30_/_39%)]"
           >
-            <Plus size={16} className="mr-1" />
-            <span className="hidden sm:inline">Post Food</span>
+            <Plus size={18} className="mr-1" />
+            <span>Post Food ➕</span>
           </button>
         }
       />
@@ -43,43 +43,43 @@ export default function DonorDashboard() {
       <main className="max-w-6xl mx-auto px-6 py-8">
         {/* Stat Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          <div className="bg-[#1565C0] text-white rounded-[14px] p-6 shadow-md relative overflow-hidden">
-            <h3 className="text-blue-100 font-semibold mb-1">Total Listings</h3>
+          <div className="bg-[var(--color-stats-blue)] backdrop-blur-xl border border-[#1565C0]/30 text-white rounded-[20px] p-6 shadow-lg relative overflow-hidden">
+            <h3 className="text-blue-100 font-semibold mb-1">Total Listings 🍕</h3>
             <div className="text-4xl font-bold mb-1">{listings.length}</div>
-            <p className="text-sm text-blue-200">All time donations</p>
-            <div className="absolute -right-4 -bottom-4 opacity-10 text-8xl">📊</div>
+            <p className="text-sm text-blue-200">All time donations 🌟</p>
+            <div className="absolute -right-4 -bottom-4 opacity-20 text-8xl">📊</div>
           </div>
           
-          <div className="bg-[#43A047] text-white rounded-[14px] p-6 shadow-md relative overflow-hidden">
-            <h3 className="text-green-100 font-semibold mb-1">Active</h3>
+          <div className="bg-[var(--color-stats-green)] backdrop-blur-xl border border-[#43A047]/30 text-white rounded-[20px] p-6 shadow-lg relative overflow-hidden">
+            <h3 className="text-green-100 font-semibold mb-1">Active 🚚</h3>
             <div className="text-4xl font-bold mb-1">{activeCount}</div>
-            <p className="text-sm text-green-200">Available or in transit</p>
-            <div className="absolute -right-4 -bottom-4 opacity-10 text-8xl">🔥</div>
+            <p className="text-sm text-green-200">Available or in transit 💨</p>
+            <div className="absolute -right-4 -bottom-4 opacity-20 text-8xl">🔥</div>
           </div>
           
-          <div className="bg-[#7B1FA2] text-white rounded-[14px] p-6 shadow-md relative overflow-hidden">
-            <h3 className="text-purple-100 font-semibold mb-1">Completed</h3>
+          <div className="bg-[var(--color-stats-purple)] backdrop-blur-xl border border-[#7B1FA2]/30 text-white rounded-[20px] p-6 shadow-lg relative overflow-hidden">
+            <h3 className="text-purple-100 font-semibold mb-1">Completed ✨</h3>
             <div className="text-4xl font-bold mb-1">{completedCount}</div>
-            <p className="text-sm text-purple-200">Successful donations</p>
-            <div className="absolute -right-4 -bottom-4 opacity-10 text-8xl">✨</div>
+            <p className="text-sm text-purple-200">Successful donations 💖</p>
+            <div className="absolute -right-4 -bottom-4 opacity-20 text-8xl">✨</div>
           </div>
         </div>
 
         {/* Listings Section */}
-        <h2 className="text-[18px] font-bold text-gray-900 mb-6 flex items-center">
-          ↗ Your Listings
+        <h2 className="text-[18px] font-bold text-white mb-6 flex items-center">
+          ↗ Your Listings 📋
         </h2>
 
         {listings.length === 0 ? (
-          <div className="bg-white rounded-[14px] p-12 text-center border overflow-hidden border-dashed border-gray-300">
+          <div className="card p-12 text-center border-dashed">
             <div className="text-gray-400 mb-3 text-5xl">🍽️</div>
-            <h3 className="text-lg font-bold text-gray-700 mb-1">No listings yet</h3>
-            <p className="text-gray-500 text-sm mb-4">You haven't posted any surplus food yet.</p>
+            <h3 className="text-lg font-bold text-white mb-1">No listings yet 🍳</h3>
+            <p className="text-gray-400 text-sm mb-4">You haven't posted any surplus food yet.</p>
             <button 
               onClick={() => setIsModalOpen(true)}
-              className="text-primary font-semibold text-sm hover:underline"
+              className="text-[var(--color-primary)] font-semibold text-sm hover:underline"
             >
-              Post your first listing
+              Post your first listing 🚀
             </button>
           </div>
         ) : (

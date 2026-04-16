@@ -15,14 +15,8 @@ export default function ReceiverDashboard() {
     if (!user) return;
     const allListings = mockDb.getListings();
     
-    // Available: Active listings (they can just browse, no action available yet unless they wait for Volunteer)
-    // Actually, maybe they can request them? For now, just browse.
     setAvailableListings(allListings.filter(l => l.status === 'active').sort((a, b) => b.servings - a.servings));
-    
-    // Pending: Volunteer claimed, waiting for Receiver to accept
     setPendingListings(allListings.filter(l => l.status === 'pending_receiver').reverse());
-
-    // In Delivery: Accepted by THIS receiver
     setInDeliveryListings(allListings.filter(l => l.status === 'in_delivery' && l.acceptedByReceiverId === user.id).reverse());
   };
 
@@ -41,7 +35,6 @@ export default function ReceiverDashboard() {
   };
 
   const handleDecline = async (listingId: string) => {
-    // If declined, push back to active for another volunteer/receiver
     await mockDb.updateListingStatus(listingId, {
       status: 'active',
       claimedByVolunteerId: undefined, // Using undefined to mock removal
@@ -57,33 +50,33 @@ export default function ReceiverDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navigation title="Receiver Dashboard" />
+    <div className="min-h-screen bg-[var(--color-background)] pb-28 flex flex-col">
+      <Navigation title="Receiver Dashboard 🏢" />
 
-      <div className="bg-white border-b sticky top-[73px] z-20">
+      <div className="bg-[var(--color-background)]/90 backdrop-blur border-b border-white/5 sticky top-[75px] z-20">
         <div className="max-w-6xl mx-auto px-6 flex gap-8">
           <button 
-            className={`py-4 font-semibold text-sm border-b-2 transition-colors ${activeTab === 'available' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-800'}`}
+            className={`py-4 font-semibold text-sm border-b-2 transition-colors ${activeTab === 'available' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-gray-400 hover:text-white'}`}
             onClick={() => setActiveTab('available')}
           >
-            Available Food
+            Available Food 🍱
           </button>
           <button 
-            className={`py-4 font-semibold text-sm border-b-2 transition-colors ${activeTab === 'pending' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-800'}`}
+            className={`py-4 font-semibold text-sm border-b-2 transition-colors ${activeTab === 'pending' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-gray-400 hover:text-white'}`}
             onClick={() => setActiveTab('pending')}
           >
-            Pending Requests 
+            Pending Requests 📬
             {pendingListings.length > 0 && (
-              <span className="ml-2 bg-red-500 text-white rounded-full px-2 py-0.5 text-xs">
+              <span className="ml-2 bg-[var(--color-primary)] text-white rounded-full px-2 py-0.5 text-xs shadow-md">
                 {pendingListings.length}
               </span>
             )}
           </button>
           <button 
-            className={`py-4 font-semibold text-sm border-b-2 transition-colors ${activeTab === 'in_delivery' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-800'}`}
+            className={`py-4 font-semibold text-sm border-b-2 transition-colors ${activeTab === 'in_delivery' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-gray-400 hover:text-white'}`}
             onClick={() => setActiveTab('in_delivery')}
           >
-            In Delivery
+            In Delivery 🚚
           </button>
         </div>
       </div>
@@ -92,15 +85,14 @@ export default function ReceiverDashboard() {
         {activeTab === 'available' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {availableListings.length === 0 ? (
-              <div className="col-span-full py-12 text-center text-gray-500">
-                No active listings available right now.
+              <div className="col-span-full py-12 text-center text-gray-400">
+                No active listings available right now 🌾
               </div>
             ) : (
               availableListings.map(listing => (
                 <ListingCard 
                   key={listing.id} 
                   listing={listing} 
-                  /* No actions here, just browsing. High Impact badge handles highlighting */
                 />
               ))
             )}
@@ -110,8 +102,8 @@ export default function ReceiverDashboard() {
         {activeTab === 'pending' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {pendingListings.length === 0 ? (
-              <div className="col-span-full py-12 text-center text-gray-500">
-                No pending requests. Check back later!
+              <div className="col-span-full py-12 text-center text-gray-400">
+                No pending requests. Check back later! 🙌
               </div>
             ) : (
               pendingListings.map(listing => (
@@ -122,15 +114,15 @@ export default function ReceiverDashboard() {
                     <div className="flex gap-2">
                       <button 
                         onClick={() => handleDecline(listing.id)}
-                        className="flex-1 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors duration-200 py-2 rounded-lg font-semibold text-sm"
+                        className="flex-1 bg-white/10 hover:bg-white/20 text-white transition-colors duration-200 py-2 rounded-[1rem] font-semibold text-sm active:scale-95"
                       >
-                        Decline
+                        Decline ❌
                       </button>
                       <button 
                         onClick={() => handleAccept(listing.id)}
-                        className="flex-1 bg-primary text-white hover:bg-opacity-90 transition-colors duration-200 py-2 rounded-lg font-semibold text-sm"
+                        className="flex-1 bg-[var(--color-primary)] hover:opacity-90 text-white transition-colors duration-200 py-2 rounded-[1rem] font-semibold text-sm active:scale-95 shadow-[0_4px_14px_0_oklch(0.68_0.22_30_/_39%)]"
                       >
-                        Accept
+                        Accept 💖
                       </button>
                     </div>
                   }
@@ -143,8 +135,8 @@ export default function ReceiverDashboard() {
         {activeTab === 'in_delivery' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {inDeliveryListings.length === 0 ? (
-              <div className="col-span-full py-12 text-center text-gray-500">
-                No incoming deliveries at the moment.
+              <div className="col-span-full py-12 text-center text-gray-400">
+                No incoming deliveries at the moment 🏚️
               </div>
             ) : (
               inDeliveryListings.map(listing => (
@@ -154,9 +146,9 @@ export default function ReceiverDashboard() {
                   actionElement={
                     <button 
                       onClick={() => handleReceived(listing.id)}
-                      className="w-full bg-[#43A047] text-white hover:opacity-90 transition-colors duration-200 py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2"
+                      className="w-full bg-[#43A047] text-white hover:opacity-90 transition-colors duration-200 py-3 rounded-[1rem] font-semibold text-sm flex items-center justify-center gap-2 active:scale-95 shadow-md"
                     >
-                      <span className="text-lg leading-none">✓</span> Mark as Received
+                      <span className="text-lg leading-none">✓</span> Mark as Received 🎉
                     </button>
                   }
                 />

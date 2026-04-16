@@ -14,24 +14,34 @@ export const Navigation = ({ title, rightElement }: { title: string, rightElemen
   };
 
   return (
-    <div className="bg-white shadow-sm sticky top-0 z-30 px-6 py-4 flex items-center justify-between">
-      <div className="flex items-center gap-4">
-        <h1 className="text-2xl font-bold text-primary">{title}</h1>
-        <span className="text-gray-500 text-sm hidden sm:inline-block">
-          Welcome back, {user?.name.split(' ')[0]}! ☀️
-        </span>
+    <>
+      {/* Top Header */}
+      <div className="px-6 py-5 flex items-center justify-between z-10 sticky top-0 bg-[var(--color-background)]/80 backdrop-blur-md border-b border-white/5">
+        <div>
+          <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-primary)] to-orange-400">{title}</h1>
+          <p className="text-gray-400 text-sm hidden sm:block mt-1">
+            Welcome back, {user?.name.split(' ')[0]}! 👋✨
+          </p>
+        </div>
       </div>
-      <div className="flex items-center gap-4">
-        {rightElement}
-        <button 
-          onClick={handleLogout}
-          className="flex items-center gap-2 text-gray-600 hover:text-red-600 transition-colors bg-gray-100 hover:bg-red-50 px-3 py-2 rounded-lg text-sm font-semibold"
-        >
-          <LogOut size={16} />
-          <span className="hidden sm:inline">Logout</span>
-        </button>
+
+      {/* Floating Bottom Nav */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-sm nav-glass rounded-[2rem] px-3 py-3 flex items-center shadow-2xl">
+         <div className="flex-1 flex justify-center">
+            {rightElement}
+         </div>
+         <div className="w-[1px] h-8 bg-white/10 mx-2"></div>
+         <div className="flex-1 flex justify-center">
+          <button 
+            onClick={handleLogout}
+            className="nav-item flex items-center gap-2 text-gray-300 hover:text-white transition-colors bg-white/5 hover:bg-red-500/40 px-5 py-3 rounded-[1.5rem] text-sm font-semibold w-full justify-center"
+          >
+            <LogOut size={18} />
+            <span>Logout</span>
+          </button>
+         </div>
       </div>
-    </div>
+    </>
   );
 };
 
@@ -45,53 +55,52 @@ export const ListingCard = ({
   const isHighImpact = listing.servings >= 20;
 
   return (
-    <div className="card p-5 flex flex-col h-full border border-gray-100">
-      <div className="flex justify-between items-start mb-3">
-        <h3 className="font-bold text-lg text-gray-900">{listing.foodType}</h3>
+    <div className="card p-5 flex flex-col h-full hover:-translate-y-1 transition-transform duration-300">
+      <div className="flex justify-between items-start mb-4">
+        <h3 className="font-bold text-lg text-white">{listing.foodType} 🍲</h3>
         {isHighImpact ? (
           <span className="high-impact-badge">
-            High Impact ({listing.servings}+ servings)
+            High Impact ({listing.servings}+) 🔥
           </span>
         ) : listing.status === 'completed' ? (
-          <span className="bg-[#E0E0E0] text-gray-800 rounded-md text-xs font-semibold px-2 py-1">
-            Completed
+          <span className="bg-white/10 text-white rounded-md text-xs font-semibold px-2 py-1">
+            Completed ✅
           </span>
         ) : (
-          <span className="bg-green-100 text-green-800 rounded-md text-xs font-semibold px-2 py-1 capitalize">
+          <span className="bg-[#43A047]/20 text-[#43A047] border border-[#43A047]/30 rounded-md text-xs font-semibold px-2 py-1 capitalize">
             {listing.status.replace('_', ' ')}
           </span>
         )}
       </div>
 
-      <div className="space-y-2 mb-4 flex-grow">
-        <div className="flex items-center text-sm text-gray-600">
-          <Users size={16} className="text-primary mr-2" />
-          <span><span className="font-semibold text-gray-800">{listing.quantity}</span> ({listing.servings} servings)</span>
+      <div className="space-y-3 mb-5 flex-grow">
+        <div className="flex items-center text-sm text-gray-300">
+          <Users size={16} className="text-[var(--color-primary)] mr-3" />
+          <span><span className="font-semibold text-gray-100">{listing.quantity}</span> ({listing.servings} servings 🍽️)</span>
         </div>
         
-        <div className="flex items-center text-sm text-gray-600">
-          <Clock size={16} className="text-primary mr-2" />
-          <span>Fresh for {listing.freshnessHours} hours</span>
+        <div className="flex items-center text-sm text-gray-300">
+          <Clock size={16} className="text-[var(--color-primary)] mr-3" />
+          <span>Fresh for {listing.freshnessHours} hours ⏳</span>
         </div>
         
-        <div className="flex items-center text-sm text-gray-600">
-          <MapPin size={16} className="text-primary mr-2" />
-          <span className="truncate">{listing.pickupLocation}</span>
+        <div className="flex items-center text-sm text-gray-300">
+          <MapPin size={16} className="text-[var(--color-primary)] mr-3" />
+          <span className="truncate">{listing.pickupLocation} 📍</span>
         </div>
       </div>
 
       {listing.description && (
-        <div className="bg-gray-50 italic text-gray-600 text-sm p-3 rounded-lg border-l-4 border-primary mb-4">
+        <div className="bg-white/5 italic text-gray-400 text-sm p-3 rounded-lg border-l-4 border-[var(--color-primary)] mb-4">
           "{listing.description}"
         </div>
       )}
 
       {actionElement && (
-        <div className="mt-auto pt-2 border-t border-gray-100">
+        <div className="mt-auto pt-4 border-t border-white/5">
           {actionElement}
         </div>
       )}
     </div>
   );
 };
-
