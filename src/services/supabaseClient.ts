@@ -93,7 +93,7 @@ export const supabase = {
           error: null
         };
       },
-      update: (data: any) => {
+      update: (_data: any) => {
         return {
           eq: () => ({
             then: (resolve: any) => resolve({ error: null })

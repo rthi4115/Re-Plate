@@ -20,7 +20,7 @@ export const RealtimeSidebar = () => {
           schema: 'public',
           table: 'donations',
         },
-        (payload) => {
+        (payload: any) => {
           const newId = Date.now().toString() + Math.random().toString();
           
           if (payload.eventType === 'INSERT') {

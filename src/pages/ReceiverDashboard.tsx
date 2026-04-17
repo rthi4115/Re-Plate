@@ -35,17 +35,17 @@ export default function ReceiverDashboard() {
       }));
       setAllAvailable(
         mapped
-          .filter(l => l.status === 'available')
-          .sort((a, b) => b.servings - a.servings)
+          .filter((l: Listing) => l.status === 'available')
+          .sort((a: Listing, b: Listing) => b.servings - a.servings)
       );
       setPendingListings(
         mapped
-          .filter(l => l.status === 'pending_receiver' && l.acceptedByReceiverId === user.id)
+          .filter((l: Listing) => l.status === 'pending_receiver' && l.acceptedByReceiverId === user.id)
           .reverse()
       );
       setInDeliveryListings(
         mapped
-          .filter(l => l.status === 'in_delivery' && l.acceptedByReceiverId === user.id)
+          .filter((l: Listing) => l.status === 'in_delivery' && l.acceptedByReceiverId === user.id)
           .reverse()
       );
     }
