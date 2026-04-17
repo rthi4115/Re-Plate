@@ -1,15 +1,15 @@
 import type { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { LogOut, Users, Clock, MapPin } from '../components/Icons';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import type { Listing } from '../types';
 
-export const Navigation = ({ title, rightElement }: { title: string, rightElement?: ReactNode }) => {
+export const Navigation = (_props: { title?: string, rightElement?: ReactNode }) => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
-  const location = useLocation();
   
   const handleLogout = () => {
     logout();
@@ -36,16 +36,16 @@ export const Navigation = ({ title, rightElement }: { title: string, rightElemen
           <button
             onClick={toggleTheme}
             aria-label="Toggle theme"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[#22C55E] transition-all duration-300 text-[var(--color-text-main)] text-xs font-bold shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[#008C44] transition-all duration-300 text-[var(--color-text-main)] text-xs font-bold shadow-sm"
           >
             <span className="text-sm">{theme === 'light' ? '☀️' : '🌙'}</span>
             <span>{theme === 'light' ? 'Light' : 'Dark'}</span>
           </button>
           <div className="relative group cursor-pointer" onClick={handleLogout}>
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#4ADE80] to-[#22C55E] flex items-center justify-center text-white font-bold text-lg shadow-[0_0_15px_rgba(34,197,94,0.3)] hover:scale-105 transition-transform">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#008C44] to-[#008C44] flex items-center justify-center text-[#0B0F19] font-bold text-lg shadow-[0_0_15px_rgba(0,140,68,0.3)] hover:scale-105 transition-transform">
               {initial}
             </div>
-            <div className="absolute top-14 right-0 bg-[var(--color-surface)] border border-[var(--color-border)] py-2 px-4 rounded-xl shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity whitespace-nowrap z-50 flex items-center gap-2 text-sm text-green-500 font-bold">
+            <div className="absolute top-14 right-0 bg-[var(--color-surface)] border border-[var(--color-border)] py-2 px-4 rounded-xl shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity whitespace-nowrap z-50 flex items-center gap-2 text-sm text-[#008C44] font-bold">
                <LogOut size={16} /> Logout
             </div>
           </div>
@@ -72,16 +72,15 @@ const BottomNav = () => {
   const tabs = [
     { id: 'home',    label: 'Home',    path: homePath,    emoji: '🏠' },
     { id: 'impact',  label: 'Impact',  path: impactPath,  emoji: '📊' },
-    { id: 'profile', label: 'Profile', path: '/profile',  emoji: '👤' },
+    { id: 'profile', label: 'Profile', path: homePath,    emoji: '👤' },
   ] as const;
 
   const activeId =
-    location.pathname === homePath    ? 'home'    :
-    location.pathname === impactPath  ? 'impact'  :
-    location.pathname === '/profile'  ? 'profile' : 'home';
+    location.pathname === homePath   ? 'home' :
+    location.pathname === impactPath ? 'impact' : 'profile';
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-[360px] h-[72px] bg-[#161B22] border border-[#30363D] rounded-full px-2 flex items-center justify-around shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-[360px] h-[72px] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-full px-2 flex items-center justify-around shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:shadow-[0_20px_40px_rgba(0,0,0,0.5)] transition-colors duration-300">
       {tabs.map(tab => {
         const active = activeId === tab.id;
         return (
@@ -89,12 +88,19 @@ const BottomNav = () => {
             key={tab.id}
             id={`nav-${tab.id}`}
             onClick={() => navigate(tab.path)}
-            className={`flex-1 flex flex-col items-center justify-center h-full rounded-full transition-all duration-300 ${active ? 'bg-[#21262D]' : 'hover:bg-[#21262D]/50'}`}
+            className={`relative flex-1 flex flex-col items-center justify-center h-[85%] rounded-full transition-colors duration-300 ${!active && 'hover:bg-[var(--color-primary)]/10'}`}
           >
-            <span className={`text-xl mb-1 transition-transform duration-200 ${active ? 'scale-110' : ''}`}>
+            {active && (
+              <motion.div
+                layoutId="nav-pill"
+                className="absolute inset-x-1 inset-y-0 bg-[var(--color-primary)]/15 border border-[var(--color-primary)]/30 rounded-full z-0"
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              />
+            )}
+            <span className={`relative z-10 text-xl mb-1 transition-transform duration-200 ${active ? 'scale-110' : ''}`}>
               {tab.emoji}
             </span>
-            <span className={`text-[10px] font-bold ${active ? 'text-[#22C55E]' : 'text-gray-500'}`}>
+            <span className={`relative z-10 text-[10px] font-bold ${active ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)]'}`}>
               {tab.label}
             </span>
           </button>
@@ -108,16 +114,22 @@ const BottomNav = () => {
 export const ListingCard = ({ 
   listing, 
   actionElement,
-  ratingBadge,
+  index = 0
 }: { 
   listing: Listing, 
   actionElement?: ReactNode,
-  ratingBadge?: ReactNode,
+  index?: number
 }) => {
   const isHighImpact = listing.servings >= 20;
 
   return (
-    <div className="card p-5 flex flex-col h-full hover:-translate-y-1 transition-transform duration-300">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.1, ease: [0.4, 0, 0.2, 1] }}
+      whileHover={{ scale: 1.03, boxShadow: '0 4px 20px rgba(0, 140, 68, 0.15)', borderColor: 'rgba(0, 140, 68, 0.3)' }}
+      className="card p-5 flex flex-col h-full bg-[var(--color-surface)] border-[var(--color-border)]"
+    >
       <div className="flex justify-between items-start mb-4">
         <h3 className="font-bold text-lg text-[var(--color-text-main)]">{listing.foodType}</h3>
         {isHighImpact ? (
@@ -125,11 +137,11 @@ export const ListingCard = ({
             High Impact
           </span>
         ) : listing.status === 'completed' ? (
-          <span className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md text-xs font-semibold px-2 py-1">
+          <span className="bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text-muted)] rounded-md text-xs font-semibold px-2 py-1">
             Completed
           </span>
         ) : (
-          <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800/50 rounded-md text-xs font-semibold px-2 py-1 capitalize">
+          <span className="bg-[rgba(0,140,68,0.1)] border border-[rgba(0,140,68,0.3)] text-[#008C44] rounded-md text-xs font-semibold px-2 py-1 capitalize">
             {listing.status.replace('_', ' ')}
           </span>
         )}
@@ -158,19 +170,11 @@ export const ListingCard = ({
         </div>
       )}
 
-      {/* Donor rating badge — shown when provided */}
-      {ratingBadge && (
-        <div className="mb-3 pt-3 border-t border-[var(--color-border)]">
-          {ratingBadge}
-        </div>
-      )}
-
       {actionElement && (
         <div className="mt-auto pt-4 border-t border-[var(--color-border)]">
           {actionElement}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
-

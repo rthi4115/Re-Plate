@@ -30,7 +30,7 @@ export const RealtimeSidebar = () => {
               message: `🥗 Fresh Food Alert: ${row.food_type} is now available!`,
               type: 'insert',
               foodType: row.food_type
-            }, ...prev].slice(0, 5)); // Keep last 5
+            } as Notification, ...prev].slice(0, 5)); // Keep last 5
           }
           
           if (payload.eventType === 'UPDATE') {
@@ -57,7 +57,7 @@ export const RealtimeSidebar = () => {
                   message: msg,
                   type,
                   foodType: newRow.food_type
-                }, ...prev].slice(0, 5));
+                } as Notification, ...prev].slice(0, 5));
               }
             }
           }
@@ -84,7 +84,7 @@ export const RealtimeSidebar = () => {
             <span className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase track-wider">Live Update</span>
             <button 
               onClick={() => setNotifications(prev => prev.filter(n => n.id !== notif.id))}
-              className="text-[var(--color-text-muted)] hover:text-white transition-colors"
+              className="text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
             </button>

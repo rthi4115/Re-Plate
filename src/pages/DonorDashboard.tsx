@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { Navigation, ListingCard } from '../components/Shared';
 import { PostFoodModal } from '../components/PostFoodModal';
 import { supabase } from '../services/supabaseClient';
@@ -129,7 +130,7 @@ export default function DonorDashboard() {
   const notifColor = (s: ListingStatus) => {
     if (s === 'pending_receiver') return 'border-blue-500/30 bg-blue-500/8';
     if (s === 'in_delivery')     return 'border-yellow-500/30 bg-yellow-500/8';
-    if (s === 'completed')       return 'border-[#22C55E]/30 bg-[rgba(34,197,94,0.08)]';
+    if (s === 'completed')       return 'border-[#008C44]/30 bg-[rgba(0,140,68,0.08)]';
     return '';
   };
 
@@ -165,9 +166,9 @@ export default function DonorDashboard() {
         )}
 
         {/* Banner */}
-        <div className="w-full bg-gradient-to-r from-[rgba(34,197,94,0.15)] to-[rgba(34,197,94,0.05)] border border-[rgba(34,197,94,0.2)] rounded-3xl p-5 flex items-center justify-between mb-6 shadow-sm">
+        <div className="w-full bg-gradient-to-r from-[rgba(0, 140, 68, 0.15)] to-[rgba(0, 140, 68, 0.05)] border border-[rgba(0, 140, 68, 0.2)] rounded-3xl p-5 flex items-center justify-between mb-6 shadow-sm">
            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-2xl shadow-sm">🍱</div>
+              <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-2xl shadow-sm animate-float">🍱</div>
               <div>
                 <h2 className="text-[var(--color-text-main)] font-bold text-lg mb-0.5 tracking-tight">Your food saves lives!</h2>
                 <p className="text-[var(--color-text-muted)] text-[12px]">{completedCount} meals delivered so far</p>
@@ -178,8 +179,8 @@ export default function DonorDashboard() {
 
         {/* 3 Stat Cards */}
         <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="bg-[var(--color-surface)] border-t-2 border-t-[#22C55E] rounded-2xl p-4 flex flex-col items-center justify-center shadow-sm">
-             <span className="text-[#22C55E] mb-2 text-lg">📦</span>
+          <div className="bg-[var(--color-surface)] border-t-2 border-t-[var(--color-primary)] rounded-2xl p-4 flex flex-col items-center justify-center shadow-sm">
+             <span className="text-[var(--color-primary)] mb-2 text-lg">📦</span>
              <span className="text-2xl font-bold text-[var(--color-text-main)] mb-1">{listings.length}</span>
              <span className="text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">Posted</span>
           </div>
@@ -188,8 +189,8 @@ export default function DonorDashboard() {
              <span className="text-2xl font-bold text-[var(--color-text-main)] mb-1">{activeCount}</span>
              <span className="text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">Claimed</span>
           </div>
-          <div className="bg-[var(--color-surface)] border-t-2 border-t-[#22C55E] rounded-2xl p-4 flex flex-col items-center justify-center shadow-sm">
-             <span className="text-[#22C55E] mb-2 text-lg">✅</span>
+          <div className="bg-[var(--color-surface)] border-t-2 border-t-[var(--color-primary)] rounded-2xl p-4 flex flex-col items-center justify-center shadow-sm">
+             <span className="text-[var(--color-primary)] mb-2 text-lg">✅</span>
              <span className="text-2xl font-bold text-[var(--color-text-main)] mb-1">{completedCount}</span>
              <span className="text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">Collected</span>
           </div>
@@ -226,14 +227,14 @@ export default function DonorDashboard() {
             {donations.filter(d => d.donorId === 'all' || d.donorId === user?.id).map(donation => (
               <div key={donation.id} className="card p-4 border border-[var(--color-border)] shadow-sm bg-[var(--color-surface)]">
                 {donation.status === 'Picked' && (
-                  <div className="mb-3 p-3 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center gap-2">
+                  <div className="mb-3 p-3 bg-[rgba(0, 140, 68, 0.15)] border border-[rgba(0, 140, 68, 0.2)] rounded-xl flex items-center gap-2">
                      <span className="animate-pulse">🔔</span>
-                     <span className="text-xs font-bold text-green-500">A volunteer ({donation.pickedBy}) is coming to pick up your food!</span>
+                     <span className="text-xs font-bold text-[var(--color-primary)]">A volunteer ({donation.pickedBy}) is coming to pick up your food!</span>
                   </div>
                 )}
                 <div className="flex justify-between items-start mb-2">
                    <h4 className="font-bold text-[var(--color-text-main)]">{donation.food}</h4>
-                   <span className={`text-[10px] px-2 py-1 rounded-full font-bold ${donation.status === 'Available' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                   <span className={`text-[10px] px-2 py-1 rounded-full font-bold ${donation.status === 'Available' ? 'bg-[rgba(0, 140, 68, 0.15)] text-[var(--color-primary)] badge-pulse' : 'bg-red-500/10 text-red-500'}`}>
                      {donation.status === 'Available' ? '🟢 Available' : '🔴 Picked'}
                    </span>
                 </div>
@@ -247,21 +248,28 @@ export default function DonorDashboard() {
 
         {/* Listings */}
         {listings.length === 0 ? (
-          <div className="flex flex-col items-center justify-center mt-12 opacity-80 cursor-pointer hover:scale-105 transition-transform" onClick={() => setIsModalOpen(true)}>
-            <div className="relative mb-4">
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
+            className="flex flex-col items-center justify-center mt-12 cursor-pointer transition-transform" 
+            onClick={() => setIsModalOpen(true)}
+          >
+            <motion.div 
+              animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+              className="relative mb-4 hover:scale-105"
+            >
                <div className="w-16 h-16 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-3xl shadow-lg relative z-10">
                  🍳
                </div>
-               <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-white font-bold text-lg z-20 shadow-md">
+               <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-[#0B0F19] font-black text-lg z-20 shadow-md">
                  +
                </div>
-            </div>
+            </motion.div>
             <p className="text-[var(--color-text-muted)] font-medium text-sm">No food posted yet. Tap + to start!</p>
-          </div>
+          </motion.div>
         ) : (
           <div className="space-y-4">
-            {listings.map(listing => (
-              <ListingCard key={listing.id} listing={listing} />
+            {listings.map((listing, i) => (
+              <ListingCard key={listing.id} listing={listing} index={i} />
             ))}
           </div>
         )}

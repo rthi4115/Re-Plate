@@ -1,5 +1,5 @@
-
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { DonationProvider } from './context/DonationContext';
@@ -13,7 +13,6 @@ import SignUp from './pages/SignUp';
 import DonorDashboard from './pages/DonorDashboard';
 import VolunteerDashboard from './pages/VolunteerDashboard';
 import ReceiverDashboard from './pages/ReceiverDashboard';
-import Profile from './pages/Profile';
 import ImpactDashboard from './pages/ImpactDashboard';
 import VolunteerImpactDashboard from './pages/VolunteerImpactDashboard';
 
@@ -28,84 +27,91 @@ const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode,
   return <>{children}</>;
 };
 
+const PageWrapper = ({ children }: { children: React.ReactNode }) => (
+  <motion.div
+    initial={{ opacity: 0, x: 20, scale: 0.98 }}
+    animate={{ opacity: 1, x: 0, scale: 1 }}
+    exit={{ opacity: 0, x: -20, scale: 0.98 }}
+    transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+    className="w-full h-full"
+  >
+    {children}
+  </motion.div>
+);
+
 const AppRoutes = () => {
   const { user } = useAuth();
+  const location = useLocation();
   
   return (
-    <Routes>
-      <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
-      <Route path="/volunteer-login" element={user ? <Navigate to="/" replace /> : <VolunteerLogin />} />
-      <Route path="/signup" element={user ? <Navigate to="/" replace /> : <SignUp />} />
-      
-      <Route 
-        path="/donor-dashboard" 
-        element={
-          <ProtectedRoute allowedRoles={['donor']}>
-            <DonorDashboard />
-          </ProtectedRoute>
-        } 
-      />
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        }
-      />
-      <Route 
-        path="/ngo-dashboard" 
-        element={
-          <ProtectedRoute allowedRoles={['ngo']}>
-            <DonorDashboard />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/volunteer-dashboard" 
-        element={
-          <ProtectedRoute allowedRoles={['volunteer']}>
-            <VolunteerDashboard />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/receiver-dashboard" 
-        element={
-          <ProtectedRoute allowedRoles={['receiver']}>
-            <ReceiverDashboard />
-          </ProtectedRoute>
-        } 
-      />
+    <AnimatePresence mode="wait" initial={false}>
+      <Routes location={location} key={location.pathname}>
+        <Route path="/login" element={<PageWrapper>{user ? <Navigate to="/" replace /> : <Login />}</PageWrapper>} />
+        <Route path="/volunteer-login" element={<PageWrapper>{user ? <Navigate to="/" replace /> : <VolunteerLogin />}</PageWrapper>} />
+        <Route path="/signup" element={<PageWrapper>{user ? <Navigate to="/" replace /> : <SignUp />}</PageWrapper>} />
+        
+        <Route 
+          path="/donor-dashboard" 
+          element={
+            <ProtectedRoute allowedRoles={['donor']}>
+              <PageWrapper><DonorDashboard /></PageWrapper>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/ngo-dashboard" 
+          element={
+            <ProtectedRoute allowedRoles={['ngo']}>
+              <PageWrapper><DonorDashboard /></PageWrapper>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/volunteer-dashboard" 
+          element={
+            <ProtectedRoute allowedRoles={['volunteer']}>
+              <PageWrapper><VolunteerDashboard /></PageWrapper>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/receiver-dashboard" 
+          element={
+            <ProtectedRoute allowedRoles={['receiver']}>
+              <PageWrapper><ReceiverDashboard /></PageWrapper>
+            </ProtectedRoute>
+          } 
+        />
 
-      {/* Impact pages */}
-      <Route
-        path="/impact"
-        element={
-          <ProtectedRoute allowedRoles={['donor', 'ngo']}>
-            <ImpactDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/volunteer-impact"
-        element={
-          <ProtectedRoute allowedRoles={['volunteer']}>
-            <VolunteerImpactDashboard />
-          </ProtectedRoute>
-        }
-      />
+        {/* Impact pages */}
+        <Route
+          path="/impact"
+          element={
+            <ProtectedRoute allowedRoles={['donor', 'ngo']}>
+              <PageWrapper><ImpactDashboard /></PageWrapper>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/volunteer-impact"
+          element={
+            <ProtectedRoute allowedRoles={['volunteer']}>
+              <PageWrapper><VolunteerImpactDashboard /></PageWrapper>
+            </ProtectedRoute>
+          }
+        />
 
-      
-      {/* Root redirect based on role */}
-      <Route 
-        path="/" 
-        element={
-          !user ? <Navigate to="/login" replace /> : 
-          <Navigate to={`/${user.role}-dashboard`} replace />
-        } 
-      />
-    </Routes>
+        {/* Root redirect based on role */}
+        <Route 
+          path="/" 
+          element={
+            <PageWrapper>
+              {!user ? <Navigate to="/login" replace /> : <Navigate to={`/${user.role}-dashboard`} replace />}
+            </PageWrapper>
+          } 
+        />
+      </Routes>
+    </AnimatePresence>
   );
 };
 

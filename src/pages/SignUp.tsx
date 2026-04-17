@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Leaf } from '../components/Icons';
 import { supabase } from '../services/supabaseClient';
 import type { Role } from '../types';
+import { useTheme } from '../context/ThemeContext';
 
 export default function SignUp() {
   const [formData, setFormData] = useState({
@@ -17,6 +18,7 @@ export default function SignUp() {
   const [isLoading, setIsLoading] = useState(false);
   
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -75,19 +77,31 @@ export default function SignUp() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-[var(--color-bg)]">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-[var(--color-bg)] relative">
+      {/* Theme Toggle */}
+      <div className="absolute top-6 right-6 z-50">
+        <button
+          onClick={toggleTheme}
+          aria-label="Toggle theme"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[#008C44] transition-all duration-300 text-[var(--color-text-main)] text-xs font-bold shadow-sm"
+        >
+          <span className="text-sm">{theme === 'light' ? '☀️' : '🌙'}</span>
+          <span>{theme === 'light' ? 'Light' : 'Dark'}</span>
+        </button>
+      </div>
+
       <div className="w-full max-w-[420px] pb-10">
         {/* Logo and Header */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 rounded-[20px] bg-gradient-to-br from-[#4ADE80] to-[#22C55E] flex items-center justify-center mb-4 shadow-[0_8px_30px_rgba(34,197,94,0.3)]">
+          <div className="w-16 h-16 rounded-[20px] bg-gradient-to-br from-[#008C44] to-[#008C44] flex items-center justify-center mb-4 shadow-[0_8px_30px_rgba(0, 140, 68,0.3)] animate-float">
             <Leaf className="text-white w-8 h-8" />
           </div>
-          <h1 className="text-[28px] font-bold text-[var(--color-text-main)] tracking-tight">Join FoodBridge</h1>
+          <h1 className="text-[28px] font-bold text-[var(--color-text-main)] tracking-tight">Join Re-Plate</h1>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5 w-full relative z-10 flex flex-col">
           {error && (
-            <div className="p-3 bg-green-900/40 text-green-300 border border-green-800/50 rounded-2xl text-sm text-center">
+            <div className="p-3 bg-[#008C44]/40 text-[#008C44] border border-[#008C44]/50 rounded-2xl text-sm text-center">
               {error}
             </div>
           )}
@@ -204,11 +218,7 @@ export default function SignUp() {
               <span>{isLoading ? 'Registering...' : 'Sign Up'}</span>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-80"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </button>
-            <div className="absolute -bottom-8 w-full flex items-center justify-center gap-4 opacity-50 blur-[2px] pointer-events-none">
-              <span className="text-xl">🍕</span>
-              <span className="text-xl">🍲</span>
-              <span className="text-xl">🍞</span>
-            </div>
+
           </div>
         </form>
 
