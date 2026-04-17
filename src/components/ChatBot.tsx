@@ -64,7 +64,7 @@ export const ChatBot = () => {
       {isOpen && (
         <div className="mb-4 w-80 sm:w-96 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-5 duration-300">
           {/* Header */}
-          <div className="bg-gradient-to-r from-[var(--color-primary)] to-[#4ADE80] p-4 flex justify-between items-center text-white">
+          <div className="bg-gradient-to-r from-[var(--color-primary)] to-[#008C44] p-4 flex justify-between items-center text-white">
             <div className="flex items-center gap-2">
               <span className="text-xl">🤖</span>
               <h3 className="font-bold tracking-wide">RePlate Assistant</h3>
@@ -126,7 +126,7 @@ export const ChatBot = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="w-14 h-14 bg-[var(--color-primary)] hover:bg-[#16A34A] text-white rounded-full flex items-center justify-center shadow-[0_4px_14px_rgba(34,197,94,0.4)] transition-transform hover:scale-110 active:scale-95"
+          className="w-14 h-14 bg-[var(--color-primary)] hover:bg-[#16A34A] text-white rounded-full flex items-center justify-center shadow-[0_4px_14px_rgba(0, 140, 68,0.4)] transition-transform hover:scale-110 active:scale-95"
         >
           <span className="text-2xl">💬</span>
         </button>

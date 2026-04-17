@@ -206,7 +206,7 @@ export default function VolunteerDashboard() {
                 return (
                   <Marker key={listing.id} position={[coord.lat, coord.lng]}>
                     <Popup className="rounded-xl border-none shadow-lg">
-                      <div className="font-bold mb-1 text-[#111827]">{listing.foodType}</div>
+                      <div className="font-bold mb-1 text-[var(--color-text-main)]">{listing.foodType}</div>
                       <div className="text-sm mb-2 text-gray-600">{listing.quantity} • {listing.servings} Servings</div>
                       <button 
                         onClick={() => handleAcceptPickup(listing.id)}
@@ -234,7 +234,7 @@ export default function VolunteerDashboard() {
                   <div key={donation.id} className="card p-4 border border-[var(--color-border)] shadow-sm bg-[var(--color-surface)]">
                     <div className="flex justify-between items-start mb-2">
                        <h4 className="font-bold text-[var(--color-text-main)]">{donation.food}</h4>
-                       <span className={`text-[10px] px-2 py-1 rounded-full font-bold ${donation.status === 'Available' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                       <span className={`text-[10px] px-2 py-1 rounded-full font-bold ${donation.status === 'Available' ? 'bg-[#008C44]/10 text-[#008C44]' : 'bg-red-500/10 text-red-500'}`}>
                          {donation.status === 'Available' ? '🟢 Available' : '🔴 Picked'}
                        </span>
                     </div>
@@ -242,7 +242,7 @@ export default function VolunteerDashboard() {
                     <div className="text-xs text-[var(--color-text-muted)] mb-3">📍 {donation.location}</div>
                     
                     <button 
-                      className={`w-full py-2 text-sm shadow-sm font-bold rounded-xl transition-all ${donation.status === 'Available' ? 'bg-[var(--color-primary)] text-white hover:opacity-90' : 'bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] cursor-not-allowed'}`}
+                      className={`w-full py-2 text-sm shadow-sm font-bold rounded-xl transition-all ${donation.status === 'Available' ? 'bg-[var(--color-primary)] text-[#0B0F19] hover:opacity-90' : 'bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] cursor-not-allowed'}`}
                       disabled={donation.status === 'Picked'}
                       onClick={() => pickupDonation(donation.id, user?.name || 'A Volunteer')}
                     >
@@ -290,7 +290,7 @@ export default function VolunteerDashboard() {
               <div className="space-y-4">
                 {filteredListings.length === 0 ? (
                   <div className="flex flex-col items-center justify-center mt-6 opacity-80">
-                    <div className="w-16 h-16 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-3xl shadow-lg mb-4">
+                    <div className="w-16 h-16 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-3xl shadow-lg mb-4 animate-float">
                       📦
                     </div>
                     <p className="text-[var(--color-text-muted)] font-medium text-sm">
@@ -323,7 +323,7 @@ export default function VolunteerDashboard() {
           <div className="space-y-4">
             {myClaims.length === 0 ? (
               <div className="flex flex-col items-center justify-center mt-12 opacity-80">
-                <div className="w-16 h-16 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-3xl shadow-lg mb-4">
+                <div className="w-16 h-16 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-3xl shadow-lg mb-4 animate-float">
                   🛵
                 </div>
                 <p className="text-[var(--color-text-muted)] font-medium text-sm">You haven't claimed any deliveries.</p>
@@ -336,7 +336,7 @@ export default function VolunteerDashboard() {
                   actionElement={
                     <button 
                       onClick={() => handleMarkDelivered(listing.id)}
-                      className="w-full bg-[#22C55E] text-white hover:opacity-90 transition-all duration-300 py-3 rounded-[9999px] font-bold text-sm flex items-center justify-center gap-2 active:scale-95 shadow-[0_4px_14px_rgba(34,197,94,0.3)]"
+                      className="w-full bg-[var(--color-primary)] text-[#0B0F19] hover:opacity-90 transition-all duration-300 py-3 rounded-[9999px] font-bold text-sm flex items-center justify-center gap-2 active:scale-95 shadow-[0_4px_14px_rgba(0, 140, 68,0.3)]"
                     >
                       <span className="text-lg leading-none">✓</span> Mark as Delivered
                     </button>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   AreaChart,
   Area,
@@ -37,9 +38,16 @@ export const AnalyticsChart = ({ title, data }: AnalyticsChartProps) => {
         </button>
       </div>
 
-      {isVisible && (
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-4 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <h4 className="text-sm font-bold text-[var(--color-text-main)] mb-6 text-center">{title}</h4>
+      <AnimatePresence>
+        {isVisible && (
+          <motion.div 
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-4 shadow-sm"
+          >
+            <h4 className="text-sm font-bold text-[var(--color-text-main)] mb-6 text-center">{title}</h4>
           
           {data.length === 0 || data.every(d => d.count === 0) ? (
             <div className="h-[250px] flex items-center justify-center text-sm font-bold text-[var(--color-text-muted)]">
@@ -54,9 +62,19 @@ export const AnalyticsChart = ({ title, data }: AnalyticsChartProps) => {
                 >
                   <defs>
                     <linearGradient id="colorGreen" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#22C55E" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#22C55E" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#008C44" stopOpacity={0.4}/>
+                      <stop offset="95%" stopColor="#008C44" stopOpacity={0}/>
                     </linearGradient>
+                    <filter id="glow2" x="-20%" y="-20%" width="140%" height="140%">
+                      <feGaussianBlur stdDeviation="3" result="blur" />
+                      <feComponentTransfer in="blur" result="glow1">
+                         <feFuncA type="linear" slope="0.8" />
+                      </feComponentTransfer>
+                      <feMerge>
+                        <feMergeNode in="glow1" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
                   </defs>
                   
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
@@ -65,7 +83,6 @@ export const AnalyticsChart = ({ title, data }: AnalyticsChartProps) => {
                     tick={{ fill: 'var(--color-text-muted)', fontSize: 10 }}
                     tickLine={false}
                     axisLine={false}
-                    margin={{ top: 10 }}
                   />
                   <YAxis 
                     tick={{ fill: 'var(--color-text-muted)', fontSize: 10 }}
@@ -82,7 +99,7 @@ export const AnalyticsChart = ({ title, data }: AnalyticsChartProps) => {
                       fontWeight: 'bold',
                       color: 'var(--color-text-main)'
                     }}
-                    itemStyle={{ color: '#22C55E' }}
+                    itemStyle={{ color: '#008C44' }}
                   />
                   <Legend 
                     wrapperStyle={{ fontSize: '11px', fontWeight: 'bold', paddingTop: '10px' }}
@@ -93,20 +110,22 @@ export const AnalyticsChart = ({ title, data }: AnalyticsChartProps) => {
                     type="monotone"
                     dataKey="count"
                     name="Completed"
-                    stroke="#22C55E"
+                    stroke="#008C44"
                     strokeWidth={3}
                     fillOpacity={1}
                     fill="url(#colorGreen)"
-                    animationDuration={1000}
+                    filter="url(#glow2)"
+                    animationDuration={1500}
                     animationEasing="ease-in-out"
-                    activeDot={{ r: 6, strokeWidth: 0, fill: '#22C55E' }}
+                    activeDot={{ r: 6, strokeWidth: 0, fill: '#008C44' }}
                   />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           )}
-        </div>
+        </motion.div>
       )}
-    </div>
+    </AnimatePresence>
+  </div>
   );
 };

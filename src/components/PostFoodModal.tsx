@@ -102,7 +102,7 @@ export const PostFoodModal = ({ isOpen, onClose, onSuccess }: PostFoodModalProps
           </div>
           <button 
             onClick={onClose}
-            className="text-[var(--color-text-muted)] hover:text-white bg-[var(--color-bg)] hover:bg-[#1E2530] p-2.5 rounded-full transition-colors"
+            className="text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] bg-[var(--color-bg)] hover:bg-[var(--color-border)] p-2.5 rounded-full transition-colors"
           >
             <X size={18} />
           </button>
@@ -156,7 +156,7 @@ export const PostFoodModal = ({ isOpen, onClose, onSuccess }: PostFoodModalProps
           </div>
 
           <div className="pt-2">
-            <button type="submit" disabled={isSubmitting} className="btn-primary w-full shadow-[0_4px_14px_rgba(34,197,94,0.3)]">
+            <button type="submit" disabled={isSubmitting} className="btn-primary w-full shadow-[0_4px_14px_rgba(0, 140, 68,0.3)]">
               ✨ {isSubmitting ? 'Creating...' : 'Create Listing'}
             </button>
           </div>

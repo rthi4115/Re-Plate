@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { Navigation, ListingCard } from '../components/Shared';
 import { supabase } from '../services/supabaseClient';
 import { useAuth } from '../context/AuthContext';
@@ -112,7 +113,7 @@ export default function ReceiverDashboard() {
            <div onClick={() => setActiveTab('available')} className={`filter-chip shrink-0 shadow-sm ${activeTab === 'available' ? 'active' : ''}`}><span className="text-xs">🍱</span> Available</div>
            <div onClick={() => setActiveTab('pending')} className={`filter-chip shrink-0 shadow-sm ${activeTab === 'pending' ? 'active' : ''}`}>
              <span className="text-xs">📬</span> Pending
-             {pendingListings.length > 0 && <span className="ml-1 bg-[var(--color-primary)] text-white w-4 h-4 flex items-center justify-center rounded-full text-[10px]">{pendingListings.length}</span>}
+             {pendingListings.length > 0 && <span className="ml-1 bg-[var(--color-primary)] text-[#0B0F19] w-4 h-4 flex items-center justify-center rounded-full text-[10px]">{pendingListings.length}</span>}
            </div>
            <div onClick={() => setActiveTab('in_delivery')} className={`filter-chip shrink-0 shadow-sm ${activeTab === 'in_delivery' ? 'active' : ''}`}><span className="text-xs">🚚</span> Delivering</div>
         </div>
@@ -146,19 +147,20 @@ export default function ReceiverDashboard() {
             </div>
 
             {availableListings.length === 0 ? (
-              <div className="flex flex-col items-center justify-center mt-12 opacity-80">
-                <div className="w-16 h-16 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-3xl shadow-lg mb-4">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center mt-12 opacity-80">
+                <motion.div animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }} className="w-16 h-16 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-3xl shadow-lg mb-4">
                   🌾
-                </div>
+                </motion.div>
                 <p className="text-[var(--color-text-muted)] font-medium text-sm">
                   {locationFilter ? `No donations found near "${locationFilter}".` : 'No active listings available right now.'}
                 </p>
-              </div>
+              </motion.div>
             ) : (
-              availableListings.map(listing => (
+              availableListings.map((listing, i) => (
                 <ListingCard
                   key={listing.id}
                   listing={listing}
+                  index={i}
                   actionElement={
                     <button
                       onClick={() => handleClaimFood(listing.id)}
@@ -177,17 +179,18 @@ export default function ReceiverDashboard() {
         {activeTab === 'pending' && (
           <div className="space-y-4">
             {pendingListings.length === 0 ? (
-              <div className="flex flex-col items-center justify-center mt-12 opacity-80">
-                <div className="w-16 h-16 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-3xl shadow-lg mb-4">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center mt-12 opacity-80">
+                <motion.div animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }} className="w-16 h-16 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-3xl shadow-lg mb-4">
                   ⏳
-                </div>
+                </motion.div>
                 <p className="text-[var(--color-text-muted)] font-medium text-sm">You haven't claimed any items waiting for pickup.</p>
-              </div>
+              </motion.div>
             ) : (
-              pendingListings.map(listing => (
+              pendingListings.map((listing, i) => (
                 <ListingCard
                   key={listing.id}
                   listing={listing}
+                  index={i}
                   actionElement={
                     <div className="w-full text-center py-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-full text-xs font-bold text-[var(--color-text-muted)]">
                        ⏳ Waiting for Volunteer Pickup
@@ -202,21 +205,22 @@ export default function ReceiverDashboard() {
         {activeTab === 'in_delivery' && (
           <div className="space-y-4">
             {inDeliveryListings.length === 0 ? (
-              <div className="flex flex-col items-center justify-center mt-12 opacity-80">
-                <div className="w-16 h-16 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-3xl shadow-lg mb-4">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center mt-12 opacity-80">
+                <motion.div animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }} className="w-16 h-16 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-3xl shadow-lg mb-4">
                   🏠
-                </div>
+                </motion.div>
                 <p className="text-[var(--color-text-muted)] font-medium text-sm">No incoming deliveries at the moment.</p>
-              </div>
+              </motion.div>
             ) : (
-              inDeliveryListings.map(listing => (
+              inDeliveryListings.map((listing, i) => (
                 <ListingCard
                   key={listing.id}
                   listing={listing}
+                  index={i}
                   actionElement={
                     <button
                       onClick={() => handleReceived(listing.id)}
-                      className="w-full bg-[#22C55E] text-white hover:opacity-90 transition-all duration-300 py-3 rounded-[9999px] font-bold text-sm flex items-center justify-center gap-2 active:scale-95 shadow-[0_4px_14px_rgba(34,197,94,0.3)]"
+                      className="w-full bg-[var(--color-primary)] text-[#0B0F19] hover:opacity-90 transition-all duration-300 py-3 rounded-[9999px] font-bold text-sm flex items-center justify-center gap-2 active:scale-95 shadow-[0_4px_14px_rgba(0, 140, 68,0.3)]"
                     >
                       <span className="text-lg leading-none">✓</span> Mark as Received
                     </button>
