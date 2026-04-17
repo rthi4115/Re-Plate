@@ -72,12 +72,13 @@ const BottomNav = () => {
   const tabs = [
     { id: 'home',    label: 'Home',    path: homePath,    emoji: '🏠' },
     { id: 'impact',  label: 'Impact',  path: impactPath,  emoji: '📊' },
-    { id: 'profile', label: 'Profile', path: homePath,    emoji: '👤' },
+    { id: 'profile', label: 'Profile', path: '/profile',  emoji: '👤' },
   ] as const;
 
   const activeId =
-    location.pathname === homePath   ? 'home' :
-    location.pathname === impactPath ? 'impact' : 'profile';
+    location.pathname === homePath    ? 'home'    :
+    location.pathname === impactPath  ? 'impact'  :
+    location.pathname === '/profile'  ? 'profile' : 'home';
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-[360px] h-[72px] bg-[#161B22] border border-[#30363D] rounded-full px-2 flex items-center justify-around shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
@@ -106,10 +107,12 @@ const BottomNav = () => {
 
 export const ListingCard = ({ 
   listing, 
-  actionElement 
+  actionElement,
+  ratingBadge,
 }: { 
   listing: Listing, 
-  actionElement?: ReactNode 
+  actionElement?: ReactNode,
+  ratingBadge?: ReactNode,
 }) => {
   const isHighImpact = listing.servings >= 20;
 
@@ -155,6 +158,13 @@ export const ListingCard = ({
         </div>
       )}
 
+      {/* Donor rating badge — shown when provided */}
+      {ratingBadge && (
+        <div className="mb-3 pt-3 border-t border-[var(--color-border)]">
+          {ratingBadge}
+        </div>
+      )}
+
       {actionElement && (
         <div className="mt-auto pt-4 border-t border-[var(--color-border)]">
           {actionElement}
@@ -163,3 +173,4 @@ export const ListingCard = ({
     </div>
   );
 };
+

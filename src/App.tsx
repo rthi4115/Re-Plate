@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -12,6 +13,7 @@ import SignUp from './pages/SignUp';
 import DonorDashboard from './pages/DonorDashboard';
 import VolunteerDashboard from './pages/VolunteerDashboard';
 import ReceiverDashboard from './pages/ReceiverDashboard';
+import Profile from './pages/Profile';
 import ImpactDashboard from './pages/ImpactDashboard';
 import VolunteerImpactDashboard from './pages/VolunteerImpactDashboard';
 
@@ -42,6 +44,14 @@ const AppRoutes = () => {
             <DonorDashboard />
           </ProtectedRoute>
         } 
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        }
       />
       <Route 
         path="/ngo-dashboard" 

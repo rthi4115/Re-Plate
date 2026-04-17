@@ -4,7 +4,9 @@ import { PostFoodModal } from '../components/PostFoodModal';
 import { supabase } from '../services/supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { useDonations } from '../context/DonationContext';
-import type { Listing, ListingStatus } from '../types';
+import { toast } from '../components/Toast';
+import { DonorRatingBadge } from '../components/ReviewModal';
+import type { Listing, ListingStatus, DonorRating } from '../types';
 
 // Status-notification banner for the donor
 interface StatusNotif {
@@ -20,6 +22,7 @@ export default function DonorDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [notifs, setNotifs] = useState<StatusNotif[]>([]);
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
+  const [myRating, setMyRating] = useState<DonorRating | null>(null);
 
   const fetchListings = async () => {
     if (!user) return;
@@ -54,15 +57,59 @@ export default function DonorDashboard() {
     }
   };
 
+  const fetchReviews = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('reviews')
+      .select('*')
+      .eq('donor_id', user.id)
+      .order('created_at', { ascending: false });
+    if (data && data.length > 0) {
+      const total = data.reduce((sum: number, r: any) => sum + r.rating, 0);
+      setMyRating({
+        avg: Math.round((total / data.length) * 10) / 10,
+        count: data.length,
+        recents: data.slice(0, 3).map((r: any) => ({ rating: r.rating, feedback: r.feedback || '' })),
+      });
+    } else {
+      setMyRating({ avg: 0, count: 0, recents: [] });
+    }
+  };
+
   useEffect(() => {
     fetchListings();
+    fetchReviews();
     const channel = supabase
-      .channel('donor-refresh')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'donations' }, () => {
-        fetchListings();
+      .channel('donations-live-donor')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'donations' },
+        (payload: any) => {
+          fetchListings();
+          const newStatus = payload.new?.status;
+          const donorId   = payload.new?.donor_id;
+          if (user && donorId === user.id) {
+            if (newStatus === 'pending_receiver') toast('📬 Your food has been claimed by a receiver!', 'info');
+            else if (newStatus === 'in_delivery') toast('🚚 Your food is picked up — on the way!', 'info');
+            else if (newStatus === 'completed') toast('🎉 Your food was delivered successfully!', 'success');
+          }
+        }
+      )
+      .subscribe();
+
+    // Listen for new reviews about this donor
+    const reviewChannel = supabase
+      .channel('reviews-live-donor')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reviews' }, () => {
+        fetchReviews();
+        toast('⭐ You received a new review!', 'success');
       })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+
+    return () => {
+      supabase.removeChannel(channel);
+      supabase.removeChannel(reviewChannel);
+    };
   }, [user]);
 
   const activeCount = listings.filter(
@@ -148,10 +195,28 @@ export default function DonorDashboard() {
           </div>
         </div>
 
+        {/* ⭐ Donor Rating Summary Card */}
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-4 mb-6 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">Your Donor Rating</h4>
+            {myRating && myRating.count > 0 && (
+              <span className="text-[11px] font-bold text-[var(--color-primary)] bg-[rgba(34,197,94,0.1)] px-2.5 py-1 rounded-full">
+                {myRating.count} {myRating.count === 1 ? 'review' : 'reviews'}
+              </span>
+            )}
+          </div>
+          <DonorRatingBadge rating={myRating ?? undefined} />
+        </div>
+
         {/* Listings Header */}
         <div className="flex items-center justify-between mb-6">
            <h3 className="text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.15em]">Your Listings</h3>
-           <span className="text-[11px] font-bold text-[var(--color-primary)]">{listings.length} found</span>
+           <button
+             onClick={() => setIsModalOpen(true)}
+             className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--color-primary)] bg-[rgba(34,197,94,0.1)] border border-[rgba(34,197,94,0.2)] px-3 py-1.5 rounded-full hover:bg-[rgba(34,197,94,0.2)] transition-all duration-200 active:scale-95"
+           >
+             <span className="text-sm leading-none">+</span> Post Food
+           </button>
         </div>
 
         {/* Context Demo Section (realtime context donations) */}
@@ -207,6 +272,16 @@ export default function DonorDashboard() {
         onClose={() => setIsModalOpen(false)}
         onSuccess={fetchListings}
       />
+
+      {/* Floating Action Button — always visible */}
+      <button
+        onClick={() => setIsModalOpen(true)}
+        id="fab-post-food"
+        aria-label="Post Food"
+        className="fixed bottom-28 right-5 z-40 w-14 h-14 rounded-full bg-[var(--color-primary)] text-white text-3xl font-bold shadow-[0_8px_24px_rgba(34,197,94,0.45)] flex items-center justify-center hover:scale-110 active:scale-95 transition-transform duration-200"
+      >
+        +
+      </button>
     </div>
   );
 }

@@ -22,13 +22,27 @@ export interface Listing {
   description?: string;
   status: ListingStatus;
   createdAt: string;
-  
-  // High impact badge is shown if servings >= 20
-  // Interactions:
-  claimedByVolunteerId?: string; // Volunteer who claimed it
+
+  claimedByVolunteerId?: string;
   claimedAt?: string;
-  acceptedByReceiverId?: string; // Receiver who accepted it
+  acceptedByReceiverId?: string;
   acceptedAt?: string;
+}
+
+export interface Review {
+  id: string;
+  donorId: string;
+  receiverId: string;
+  donationId: string;
+  rating: number;        // 1–5
+  feedback?: string;
+  createdAt: string;
+}
+
+export interface DonorRating {
+  avg: number;           // average of all ratings
+  count: number;         // total number of reviews
+  recents: { rating: number; feedback: string }[]; // up to 3 latest
 }
 
 // Global context state for auth
@@ -37,3 +51,4 @@ export interface AuthState {
   login: (user: User) => void;
   logout: () => void;
 }
+
